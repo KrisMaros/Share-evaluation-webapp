@@ -1,0 +1,31 @@
+<script>       
+             
+       var groupId = 0;
+
+       document.getElementById("getData").addEventListener("click",tickerRequest);
+
+       loadList();
+                     
+       dateRangeSelection();
+       
+       setDefaultDate();
+        
+        //Creates new chart on web page load.
+        window.onload = function() {
+        
+             try  { 
+                   
+                   var ctx = document.getElementById("canvas").getContext("2d");
+                   //removes default dataset from chart config 
+                   config.data.datasets.splice(0, 1);
+                   window.lineChart = new Chart(ctx, config);
+                                      
+              }
+              catch(err) {
+              
+                  console.log('onload()'+err);
+              }            
+        };
+       
+         
+</script>

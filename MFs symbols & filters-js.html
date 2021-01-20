@@ -1,0 +1,241 @@
+<script>
+
+      var globalFilteredList = {
+                
+                    ticker: [],
+                    name: [],
+                    yield: [],
+                    rate: []
+                };
+      
+      document.getElementById("resetTicker").addEventListener("click",resetTicker);
+      document.getElementById("resetYield").addEventListener("click",resetYield);
+      document.getElementById("resetRate").addEventListener("click",resetRate);
+      
+      //Clear stock name from the list
+      function resetTicker() {      
+           
+           $("#symbol").val('').trigger('change');      
+      }
+      
+      //Clear sector filter from a list
+      function resetYield() {
+      
+           $("#yield").val('').trigger('change');                 
+      }
+      
+      //Clear country filter from a list
+      function resetRate() {      
+           
+           $("#rate").val('').trigger('change');                 
+      }
+      
+
+      // Loadin list of symbols and names for available stocks from spreasheet     
+       function loadList()  {
+       
+           try {
+           
+                  google.script.run.withSuccessHandler(getMFsAndFilterList).requestMFsLists();
+
+           }
+           catch(err) {
+           
+                console.log('loadList() '+err);
+           }           
+       }  
+       
+       
+       // returns filters list and sorts filters category accordingly to user selection
+       function getMFsAndFilterList(data) {       
+                           
+                var filteredList = {
+      
+                       ticker: [],
+                       name: [],
+                       yield: [],
+                       rate: []
+                };
+                
+                var selected1 = 0;
+                var selected2 = 0;
+                
+           try {
+                 selected1 = $('#yield').find('option:selected').length;
+                 selected2 = $('#rate').find('option:selected').length;                 
+                 
+                 if (selected1 == 0 || selected2 == 0 ) {
+                 
+                       setFilters(data);                       
+                 }                  
+                  
+                 var yield = $("#yield").val();
+                 var rate = $("#rate").val();                  
+                  
+                if (yield != '' && rate != '') {    
+
+                    for (var i=0; i < data.fund.length; i++)  { 
+                    
+                       var yieldCheck = yieldValidator(yield, data.fund[i][2]);
+                           
+                       if(yieldCheck != undefined) {
+                       
+                            if(rate == data.fund[i][3])   {
+                           
+                               filteredList.ticker.push(data.fund[i][0]);
+                               filteredList.name.push(data.fund[i][1]);
+                               filteredList.yield.push(data.fund[i][2]);
+                               filteredList.rate.push(data.fund[i][3]);
+                            }                        
+                        }                       
+                    }
+//                    console.log('yield rate '+filteredList.name);                    
+                }
+                else if (yield != '') {
+                
+                    for (var i=0; i < data.fund.length; i++)  {
+                     
+                       var yieldCheck = yieldValidator(yield, data.fund[i][2]);
+                       
+                           
+                       if(yieldCheck != undefined) {                           
+                            
+                            filteredList.ticker.push(data.fund[i][0]);
+                            filteredList.name.push(data.fund[i][1]);
+                            filteredList.yield.push(data.fund[i][2]);
+                            filteredList.rate.push(data.fund[i][3]);
+                        }                  
+                    }
+//                     console.log('yield '+filteredList.name);
+                }
+                else if (rate != '') {
+                
+                      for (var i=0; i < data.fund.length; i++)  {
+                      
+                          if(rate == data.fund[i][3])   {
+                      
+                              filteredList.ticker.push(data.fund[i][0]);
+                              filteredList.name.push(data.fund[i][1]);
+                              filteredList.yield.push(data.fund[i][2]);
+                              filteredList.rate.push(data.fund[i][3]);
+                           }                      
+                      }
+//                      console.log('rate '+filteredList.name);
+                }
+                else {
+             
+                   for (var i=0; i < data.fund.length; i++)  {                  
+                           
+                       filteredList.ticker.push(data.fund[i][0]);
+                       filteredList.name.push(data.fund[i][1]);
+                       filteredList.yield.push(data.fund[i][2]);
+                       filteredList.rate.push(data.fund[i][3]);
+                   }
+//                   console.log('no filter '+filteredList.name);
+               }
+               
+               dropdownListHandler(filteredList);      
+           }
+           catch(err) {
+           
+                console.log('getMFsAndFilterList() '+err);
+           }      
+       }
+       
+       
+       //loading filters lists
+       function setFilters(data)  {
+       
+                 var filters = {
+                  
+                       yield: [],
+                       rate: []                                        
+                  };                  
+       
+            try {                
+
+                  data.filter.forEach((element) => {                  
+
+                      filters.yield.push(element[0]);
+                      filters.rate.push(element[1]);
+                 });                
+                  
+                  $("#yield").select2({
+                  
+                      placeholder: "Yield",          
+                      data: filters.yield 
+                  });
+                  
+                   $("#rate").select2({
+                   
+                      placeholder: "Rate",          
+                      data: filters.rate 
+                  });
+            
+            }
+            catch(err) {
+            
+                console.log('setFilters'+err);
+            }
+       }
+       
+       
+       //loading filterd list of the stock names 
+       function dropdownListHandler(filteredList)  {       
+
+            try { 
+                   // clears previous list
+                   $("#symbol").empty().trigger('change');
+                      
+                   $("#symbol").select2({
+                  
+                        placeholder: "Mutual Funds List",         
+                        data: filteredList.name 
+                   });
+                      
+                   $("#symbol").val('').trigger('change');
+                 
+                for (var i=0; i < filteredList.name.length; i++)  {                  
+                           
+                     globalFilteredList.ticker.push(filteredList.ticker[i]);
+                     globalFilteredList.name.push(filteredList.name[i]);
+                     globalFilteredList.yield.push(filteredList.yield[i]);
+                     globalFilteredList.rate.push(filteredList.rate[i]);
+                }
+//                console.log('filtered '+filteredList.name);
+            }
+            catch(err) {
+            
+                 console.log('dropdownListHandler'+err);
+            }
+       }
+       
+       // gets selected ticker value on chanche from dropdown list and sent to the spreadsheet
+       function getSelectedTickerMFs()  {       
+       
+           try {
+                
+                var selected = $("#symbol").val();                            
+//              console.log('global'+sheetContent);                
+                
+                for (var i=0; i < globalFilteredList.name.length; i++)  {
+                
+                    if(selected == globalFilteredList.name[i]) {
+                    
+                         google.script.run.setMFticker(globalFilteredList.ticker[i],
+                                                  selected,                                                                  
+                                                  globalFilteredList.yield[i],
+                                                  globalFilteredList.rate[i]);
+                         break;   
+                    }                             
+                }                               
+           }
+           catch(err) {
+           
+                console.log('getSelectedTickerMFs() '+err);           
+           }       
+       }
+
+</script>
+
+

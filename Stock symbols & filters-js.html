@@ -1,0 +1,254 @@
+<script>
+
+var globalFilteredList = {
+
+   ticker: [],
+   name: [],
+   exchange: [],
+   sector: [],
+   country: [],
+   exchangeName: []
+};
+
+document.getElementById("resetTicker").addEventListener("click",resetTicker);
+document.getElementById("resetSector").addEventListener("click",resetSector);
+document.getElementById("resetCountry").addEventListener("click",resetCountry);
+
+//Clear stock name from the list
+function resetTicker() {      
+
+   $("#symbol").val('').trigger('change');      
+}
+
+//Clear sector filter from a list
+function resetSector() {
+
+   $("#sector").val('').trigger('change');                 
+}
+
+//Clear country filter from a list
+function resetCountry() {      
+
+   $("#country").val('').trigger('change');                 
+}
+
+
+// Loadin list of symbols and names for available stocks from spreasheet     
+function loadList()  {
+
+   try {
+       google.script.run.withSuccessHandler(getStockAndFilterList).requestLists();
+
+   }
+   catch(err) {
+        console.log('loadList() '+err);
+   }           
+}
+
+// returns filters list and sorts filters category accordingly to user selection
+function getStockAndFilterList(data) {       
+
+    var filteredList = {
+
+           ticker: [],
+           name: [],
+           exchange: [],
+           sector: [],
+           country: [],
+           exchangeName: []
+    };
+
+    var selected1 = 0;
+    var selected2 = 0;
+
+   try {
+         selected1 = $('#sector').find('option:selected').length;
+         selected2 = $('#country').find('option:selected').length;                 
+
+         if (selected1 == 0 || selected2 == 0 ) {
+               setFilters(data);                       
+         }                  
+
+         var sector = $("#sector").val();
+         var country = $("#country").val();                  
+
+        if (country != '' && sector != '') {    
+
+            for (var i=0; i < data.stock.length; i++)  {                   
+
+               if(country == data.stock[i][4]) {
+
+                    if(sector == data.stock[i][3])   {
+
+                        filteredList.ticker.push(data.stock[i][0]);
+                        filteredList.name.push(data.stock[i][1]);
+//                                filteredList.exchange.push(data.stock[i][2]);
+                        filteredList.sector.push(data.stock[i][3]);
+                        filteredList.exchangeName.push(data.stock[i][5]);
+                    }                        
+                }                       
+            }
+//                    console.log('country sector '+filteredList.name);                    
+        }
+        else if (country != '') {
+
+             for (var i=0; i < data.stock.length; i++)  {
+
+                  if(country == data.stock[i][4]) {
+
+                      filteredList.ticker.push(data.stock[i][0]);
+                      filteredList.name.push(data.stock[i][1]);
+//                         filteredList.exchange.push(data.stock[i][2]);
+                      filteredList.sector.push(data.stock[i][3]);
+                      filteredList.exchangeName.push(data.stock[i][5]);
+                  }                  
+             }
+//                     console.log('country '+filteredList.name);
+        }
+        else if (sector != '') {
+
+              for (var i=0; i < data.stock.length; i++)  {
+
+                  if(sector == data.stock[i][3])   {
+
+                      filteredList.ticker.push(data.stock[i][0]);
+                      filteredList.name.push(data.stock[i][1]);
+//                              filteredList.exchange.push(data.stock[i][2]);
+                      filteredList.sector.push(data.stock[i][3]);
+                      filteredList.exchangeName.push(data.stock[i][5]);
+                   }                      
+              }
+//                      console.log('sector '+filteredList.name);
+        }
+        else {
+
+           for (var i=0; i < data.stock.length; i++)  {                  
+
+               filteredList.ticker.push(data.stock[i][0]);
+               filteredList.name.push(data.stock[i][1]);
+//                       filteredList.exchange.push(data.stock[i][2]);
+               filteredList.sector.push(data.stock[i][3]);
+               filteredList.exchangeName.push(data.stock[i][5]);
+           }
+//                   console.log('no filter '+filteredList.name);
+       }
+
+       dropdownListHandler(filteredList);      
+   }
+   catch(err) {
+        console.log('getStockAndFilterList() '+err);
+   }      
+}
+
+//loading filters lists
+function setFilters(data)  {
+
+         var filters = {
+               exchange: [],
+               sector: [],
+               country: []                  
+          };                  
+
+    try {                
+
+          data.filter.forEach((element) => {
+
+//             filters.exchange.push(data.filter[i][0]);
+              filters.sector.push(element[0]);
+              filters.country.push(element[1]);
+         });                
+
+          $("#sector").select2({
+
+              placeholder: "Sector",          
+              data: filters.sector 
+          });
+
+           $("#country").select2({
+
+              placeholder: "Country",          
+              data: filters.country 
+          });
+
+    }
+    catch(err) {
+
+        console.log('setFilters'+err);
+    }
+}
+
+
+//loading filterd list of the stock names 
+function dropdownListHandler(filteredList)  { 
+
+//                 var list = 0;
+    try {
+              // clears previous list
+              $("#symbol").empty().trigger('change');
+
+              $("#symbol").select2({
+
+                  placeholder: "Stock List",         
+                  data: filteredList.name 
+              });
+
+              $("#symbol").val('').trigger('change');
+
+        for (var i=0; i < filteredList.name.length; i++)  {                  
+
+             globalFilteredList.ticker.push(filteredList.ticker[i]);
+             globalFilteredList.name.push(filteredList.name[i]);
+//                   globalFilteredList.exchange.push(filteredList.exchange[i]);
+             globalFilteredList.sector.push(filteredList.sector[i]);
+             globalFilteredList.exchangeName.push(filteredList.exchangeName[i]);
+        }
+//                console.log('filtered '+filteredList.name);
+    }
+    catch(err) {
+
+         console.log('dropdownListHandler'+err);
+    }
+}
+
+// gets selected ticker value on chanche from dropdown list and sent to the spreadsheet
+function getSelectedTicker()  {       
+
+   try {
+
+        var selected = $("#symbol").val();                            
+//              console.log('global'+sheetContent);                
+
+         for (var i=0; i < globalFilteredList.name.length; i++)  {
+
+             if(selected == globalFilteredList.name[i]) {
+
+                 if (globalFilteredList.ticker[i] == '.INX' || globalFilteredList.ticker[i] == '.IXIC' || globalFilteredList.ticker[i] == '.DJI')  {
+
+                      google.script.run.setNewTicker(globalFilteredList.ticker[i],
+                                                     selected,
+                                                     globalFilteredList.sector[i],
+                                                     globalFilteredList.exchangeName[i]);
+                      break;                             
+                 }
+                 else  {
+                       // Uk stock needs to split ticker from the list
+                       var formatTicker = globalFilteredList.ticker[i].split('.');                             
+
+                       google.script.run.setNewTicker(formatTicker[0],
+                                                      selected,                                                                  
+                                                      globalFilteredList.sector[i],
+                                                      globalFilteredList.exchangeName[i]);
+                       break;                             
+                 }                            
+             }
+         }                               
+   }
+   catch(err) {
+
+        console.log('getSelectedTicker() '+err);           
+   }       
+}
+
+</script>
+
+

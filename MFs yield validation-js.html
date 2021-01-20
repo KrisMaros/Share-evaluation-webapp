@@ -1,0 +1,47 @@
+<script>
+
+    function yieldValidator(yield, value) {
+    
+    
+              var data = Number(value);              
+        try {
+           
+             if (yield == '0-2%')  {
+             
+                 if(data >= 0 && data <= 2) {                 
+                    
+                    return data;                    
+                 }                          
+             }
+             else if (yield == '2-4%')  {
+             
+                 if(data >= 2 && data <= 4) {
+                    
+                    return data;                    
+                 }                          
+             }
+             else if (yield == '4-6%')  {
+             
+                 if(data >= 4 && data <= 6) {                 
+                    
+                    return data;                    
+                 }                          
+             }
+             else if (yield == '6% or higher')  {
+             
+                 if(data >= 6) {
+                 
+                    return data;                    
+                 }                          
+             }             
+        
+        }
+        catch(err) {
+           
+             console.log('yieldValidator() '+err);
+        } 
+   }
+
+</script>
+
+

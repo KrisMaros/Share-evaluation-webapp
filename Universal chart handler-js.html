@@ -1,0 +1,239 @@
+<script>
+
+      // collection of available colors for the chart
+       window.chartColors =  {
+         red: 'rgb(255, 99, 132)',
+         orange: 'rgb(255, 159, 64)',
+         yellow: 'rgb(255, 205, 86)',
+         green: 'rgb(75, 192, 192)',
+         blue: 'rgb(54, 162, 235)',
+         purple: 'rgb(153, 102, 255)',
+         grey: 'rgb(231,233,237)'
+       };
+     
+      var colorNames = Object.keys(window.chartColors);
+      
+      // chart configuration object.    
+       var config = {
+            type: 'line',
+            data: {
+              labels: [],
+                  datasets:[{
+                  label: '',
+                  data: [], 
+                  backgroundColor: '',
+                  fill: 'false',                      
+                  borderColor: '',
+                  borderWidth: 1,                                                          
+              }]
+            },
+            options: {
+              elements: {
+                  point:{
+                    radius: 0
+                 }
+              },
+              legend: {
+                  labels: {               
+                      fontColor: 'white',
+                      defaultFontSize: 14
+                    }
+              },
+              responsive: false,
+              title: {
+                display: true,
+                text: 'Stock equating instrument',
+                fontColor: 'white',
+                fontSize: 16
+              },
+              tooltips: {
+                mode: 'index',
+                intersect: false,
+              },
+              hover: {
+                mode: 'nearest',
+                intersect: true
+              },
+              scales: {
+                xAxes: [{
+                ticks: {
+                    fontSize: 11,
+                    fontColor: 'white'     
+                  },
+                  display: true,
+                  scaleLabel: {
+                    display: true,
+                    labelString: 'Dates',
+                    fontColor: 'white',
+                    fontSize: 16
+                  }
+                }],
+                yAxes: [{
+                      ticks: {
+                    fontSize: 14,
+                    fontColor: 'white'
+                  },
+                  display: true,
+                  scaleLabel: {
+                    display: true,
+                    labelString: '',
+                    fontColor: 'white'
+                  }
+               }]
+             }
+           }
+        };
+        
+        //Detects type of chart dataset being selected. Creates new chart datasets. Updates chart configuration.
+          function addDataset(data) {
+          
+              var dataset = {};
+              var newDataset = {};
+              var checkBox = document.getElementById("change").checked;
+              
+              try {
+              
+                   if(checkBox)  { 
+                 
+                      dataset = createPercentDataset(data);                      
+                   }
+                   else {
+                 
+                      dataset = createPriceDataset(data);
+                   }      
+                   
+                   newDataset = buildNewDataset(data,dataset);          
+           
+                  // adding new lables set if chart is empty
+                  if (config.data.labels.length == 0) {
+            
+                      for (var index = 0; index < dataset.labels.length; ++index) {
+                
+                          config.data.labels.push(dataset.labels[index]);
+                      }
+                  }    
+                
+                  config.data.datasets.push(newDataset);          
+                  window.lineChart.update();          
+              
+                  }
+                  catch(err) {
+              
+                     console.log('createPercentDataset()'+ err);
+                 }               
+          }
+          
+         //Selecting dataset type. Building new chart dataset       
+         function buildNewDataset(data,dataset)  {    
+       
+            var colorName = colorNames[config.data.datasets.length % colorNames.length];
+            var newColor = window.chartColors[colorName];
+            var newLabel = data[0][2];
+            var newDataset = {};
+            
+            try {
+            
+                  var checkBox = document.getElementById("change").checked;          
+          
+                  if(checkBox)  {             
+            
+                       config.options.scales.yAxes[0].scaleLabel.labelString = 'Percent %';
+                
+                         newDataset =    {                
+                         label: newLabel,
+                         backgroundColor: colorName,
+                         borderColor: newColor,
+                         data: dataset.percentDataset,           
+                         fill: false,
+                         borderWidth: 1.3,
+                         tension: 0
+                      };
+                      document.getElementById("change").disabled = true;
+                      $("#startDate").datepicker('disable');
+                      $("#endDate").datepicker('disable');                                     
+                  } 
+                  else {               
+            
+                      config.options.scales.yAxes[0].scaleLabel.labelString = 'Price';
+                
+                         newDataset =    {                
+                         label: newLabel,
+                         backgroundColor: colorName,
+                         borderColor: newColor,
+                         data: dataset.priceDataset,           
+                         fill: false,
+                         borderWidth: 1.3,
+                         tension: 0
+                      };
+                      document.getElementById("change").disabled = true;
+                      $("#startDate").datepicker('disable');
+                      $("#endDate").datepicker('disable');
+                  }
+                  return newDataset;
+            
+                }
+                catch(err) {
+            
+                    console.log('buildNewDataset '+err);
+                }            
+         }   
+            
+        //Removing dataset from the chart 
+        document.getElementById('removeDataset').addEventListener('click', function() {
+        
+              var num = 0;
+              var id = 0;
+        
+              try  { 
+                 
+                    config.data.datasets.splice(0, 1);
+                    
+                    //removing labels set if datasets not holding any stock data            
+                    if(config.data.datasets.length == 0) {
+            
+                        num = config.data.labels.length;
+                        config.data.labels.splice(0, num);                 
+                 
+                        document.getElementById("change").disabled = false;
+                        $("#startDate").datepicker('enable');
+                         $("#endDate").datepicker('enable');
+                    }
+                    window.lineChart.update();
+                    
+                    //returning first id for select tag in the document
+                    id = $(".aside").find('section').first().attr('id');                    
+                    
+                    if(id) {
+                    
+                         //remove document section for set of stock attributes
+                         for (var i=0; i< 9; i++) {
+              
+                              $("#price"+id).find('div').first().remove();          
+                         }
+                         
+                         $(".aside").find('section').first().remove();
+                         
+                         for (var i=0; i< 3; i++) {
+              
+                              $("#metric"+id).find('div').first().remove();          
+                         }
+                         
+                         $(".aside").find('section').first().remove();
+                        
+                         for (var i=0; i< 6; i++) {
+              
+                              $("#other"+id).find('div').first().remove();          
+                         }                        
+                        
+                         $(".aside").find('section').first().remove();                    
+                     }              
+                 }
+                 catch(err) {
+              
+                     console.log('removeDataset()'+err);
+                 }       
+        });
+
+</script>
+
+

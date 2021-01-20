@@ -1,0 +1,67 @@
+<script>
+
+      //selects date range and sends to spreadsheet 
+       function dateRangeSelection()  { 
+       
+          try  {                      
+         
+              $("#startDate").datepicker({ 
+              
+                  changeMonth: true,
+                  changeYear: true,                  
+                  onSelect: function() {
+          
+                      var startDate = $(this).datepicker('getDate');
+                      var date = $.datepicker.formatDate('dd-mm-yy', startDate);
+                      
+                      console.log('startdate '+date);
+                      google.script.run.setMFsStartDateRange(date);                      
+                   }
+              });              
+   
+               $("#endDate").datepicker({
+               
+                  changeMonth: true,
+                  changeYear: true,
+                  onSelect: function() {
+          
+                      var endDate = $(this).datepicker('getDate');
+                      var date = $.datepicker.formatDate('dd-mm-yy', endDate);
+                      
+                       console.log('enddate '+date);
+                      google.script.run.setMFsEndDateRange(date);
+                   }
+               });            
+           }
+           catch (err) {
+            
+                console.log("dateRangeSelection() "+err );
+           }         
+       }
+       
+       function setDefaultDate()  {
+       
+           try{
+           
+                $('#startDate').datepicker('setDate', '-30');
+                var startDate = $('#startDate').datepicker('getDate');
+                var date = $.datepicker.formatDate('dd-mm-yy', startDate);                      
+                      
+                google.script.run.setMFsStartDateRange(date);
+           
+                $('#endDate').datepicker('setDate', '0');
+                var endDate = $('#endDate').datepicker('getDate');
+                var date2 = $.datepicker.formatDate('dd-mm-yy', endDate);                      
+                      
+                google.script.run.setMFsEndDateRange(date2);
+           
+           }
+           catch(err) {
+               
+               console.log('setDefaultDate'+err);
+           }         
+       }
+
+</script>
+
+

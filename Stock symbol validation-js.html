@@ -1,0 +1,62 @@
+<script>
+
+     //requests ticker from spreadsheet to proccess validation 
+         function tickerRequest() { 
+         
+              try  { 
+                   google.script.run.withSuccessHandler(returnConfirmation).confirmChange();
+              }
+              catch(err) {
+              
+                  console.log('runChart() '+err);
+              }                      
+         }         
+         
+         
+         // returns call back ticker and pass paramiter to validation method 
+         function returnConfirmation(confirm) {
+         
+              try  { 
+                   callBackValidation(confirm);
+              }
+              catch(err) {
+              
+                  console.log('returnConfirmation() '+err);
+              }             
+         }
+         
+         
+         //check is call back valid if not delay time and repit call back 
+         //If yes run function that returns datasets for current stock
+         function callBackValidation(confirm) {               
+               
+              try  { 
+              
+                    var name = $("#symbol").val();
+                    
+                    console.log('confirm '+confirm);
+               
+                    if(name == confirm) {
+               
+                        getAllSheetRecords();                   
+                    }                    
+                    else if(name != confirm) {
+               
+                        //delay call back for 200 milisec. 
+                        setTimeout(200);
+                        google.script.run.withSuccessHandler(returnConfirmation).confirmChange();                
+                    }
+                    else  {                   
+                         getAllSheetRecords();                                   
+                    }
+              
+                    }
+                    catch(err) {
+              
+                        console.log('callBackValidation() '+err);
+               }              
+         } 
+
+</script>
+
+

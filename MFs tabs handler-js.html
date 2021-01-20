@@ -1,0 +1,68 @@
+<script>
+    
+   function openTab(event, tabId) {     
+        
+       try {
+            
+           tabContent();
+           tabLinks();           
+           displaySections(event, tabId);
+              
+       }
+       catch (err){
+                
+           console.log('openTab()'+ err);                
+       }
+   }
+
+   function tabContent() {
+            
+        try {            
+              var tabcontent = document.getElementsByClassName("tabcontent");             
+             
+              for (var i = 0; i < tabcontent.length; i++) {
+             
+                  tabcontent[i].style.display = "none";                 
+              }         
+         }
+         catch (err){
+                
+              console.log('tabContent()'+ err);                
+         }     
+   }
+
+   function tabLinks() {
+            
+        try {        
+               var tablinks = document.getElementsByClassName("tablinks");
+             
+               for (var i = 0; i < tablinks.length; i++) {
+                   tablinks[i].className = tablinks[i].className.replace(" active", "");
+               }        
+        }
+        catch (err){
+                
+            console.log('tabLinks()'+ err);                
+        }       
+   }   
+   
+   function displaySections(event, tabId) {   
+              
+        try {              
+              //finding all sections with id name including tabId paramiter and sets css attributes 
+              $('section[id*='+tabId+']').each(function() {
+                   
+                   $(this).css("display", "flex");
+                   event.currentTarget.className += " active";
+              });              
+//               console.log('tabId '+JSON.stringify(sectionNum));
+        }
+        catch (err){
+                
+            console.log('displaySections()'+ err);                
+        }       
+   }
+    
+</script>
+
+

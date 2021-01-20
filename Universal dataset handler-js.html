@@ -1,0 +1,99 @@
+<script>
+  
+      //Creating pecentage dataset
+        function createPercentDataset(data)  {
+          
+             var labels = [];
+             var percentDataset = [];
+             var percentageChange = 0;
+             var firstNum = 0;
+             var secondNum = 0;
+             var num = 0;
+             var numDate = 0;
+             var dataset = {};
+          
+             try {
+                
+                 for (var i=0; i<data.length; i++) {                
+                      
+                    if(data[i][1] != '') {
+                             
+                       labels.push(data[i][0]);                          
+                       firstNum = data[i][1];
+                       secondNum = data[++i][1];                           
+                             
+                       percentageChange += getPercentageChange(firstNum, secondNum);
+                       percentDataset.push(percentageChange.toFixed(2));
+                       --i;                      
+                    }                                            
+                }
+                // slising array to remove last percentage element
+                num = percentDataset.length-1;                
+                dataset.percentDataset = percentDataset.slice(0,num);
+                
+                // slising array to remove first date element
+                numDate = labels.length;
+                dataset.labels = labels.slice(1,numDate);
+                
+//                console.log('percent '+dataset.labels.length);
+                        
+                return dataset;
+            }    
+            catch (err){
+                
+                 console.log('createPercentDataset()'+ err);                
+            }
+            return null;
+        } 
+        
+       
+        //Creating price dataset
+        function createPriceDataset(data)  {
+          
+            var priceDataset = [];                     
+            var labels = [];
+            var dataset = {};
+          
+            try {
+                
+                for (var i=0; i<data.length; i++) {                
+                      
+                   if(data[i][1] != '') {
+                             
+                        priceDataset.push(data[i][1]);
+                        labels.push(data[i][0]);                      
+                   }                                            
+               }
+               dataset.priceDataset = priceDataset;                        
+               dataset.labels = labels;
+               
+//               console.log('price '+dataset.labels.length);
+                        
+                  return dataset;
+               }    
+               catch (err){
+                
+                  console.log('createPriceDataset()'+ err);                
+               }
+               return null;
+        }
+        
+        
+        //Returns percentage difference betweene two values
+        function getPercentageChange(firstNumber, secondNumber) {
+        
+             try  { 
+             
+                   var decreaseValue = secondNumber - firstNumber;
+                   var result = (decreaseValue / firstNumber) * 100;
+                   return Number(result.toFixed(2));              
+              }
+              catch(err) {
+              
+                  console.log('getPercentageChange()'+err);
+              }              
+        }
+
+</script>
+
+

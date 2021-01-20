@@ -1,0 +1,60 @@
+<script>
+
+      //requesting datasets from spreadsheet after call back is valid
+         function getAllSheetRecords() {
+              
+             try  { 
+                   google.script.run.withSuccessHandler(addDataset).getStockHistoricalData();
+                   google.script.run.withSuccessHandler(returnedSheetAttributes).getStockAttributeData();
+              }
+              catch(err) {
+              
+                  console.log('getAllSheetRecords() '+err);
+              }                                    
+         }           
+          
+          
+         //Creating number of dives in section tag
+         //Returning stock attributes and placing them in sections 
+         function returnedSheetAttributes(data) {
+         
+             try  {
+              
+                   $(".aside").append('<section class="tabcontent" id="price'+groupId+'"></section>');              
+              
+                   //creating div's tags with stock attributes content
+                   for (var i=0; i<data.price.length; i++) {              
+                    
+                         var attribute = '<div>'+data.price[i][0]+' : '+data.price[i][1]+'</div>';                 
+                         $("#price"+groupId).append(attribute);                   
+                   }
+                   
+                   $(".aside").append('<section class="tabcontent" id="metric'+groupId+'"></section>');              
+              
+                   //creating div's tags with stock attributes content
+                   for (var i=0; i<data.metrics.length; i++) {              
+                    
+                         var attribute = '<div>'+data.metrics[i][0]+' : '+data.metrics[i][1]+'</div>';                 
+                         $("#metric"+groupId).append(attribute);                   
+                   }
+                   
+                   $(".aside").append('<section class="tabcontent" id="other'+groupId+'"></section>');              
+              
+                   //creating div's tags with stock attributes content
+                   for (var i=0; i<data.other.length; i++) {              
+                    
+                         var attribute = '<div>'+data.other[i][0]+' : '+data.other[i][1]+'</div>';                 
+                         $("#other"+groupId).append(attribute);                   
+                   }
+                     ++groupId;
+              
+                   }
+                   catch(err) {
+              
+                        console.log('returnedSheetAttributes() '+err);
+                   }            
+         } 
+
+</script>
+
+

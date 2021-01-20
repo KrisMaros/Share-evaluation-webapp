@@ -1,0 +1,35 @@
+<script>    
+    
+   //call function to check screen width
+   document.getElementsByTagName("BODY")[0].onresize = function() { myFunction() };    
+   
+   (function() {
+       
+       //get nav container get menu image link
+       var menu = document.querySelector('nav'),
+           menulink = document.querySelector('img');
+      
+       menulink.addEventListener('click', function(e) {
+         //switch nav classes nav-menu and nav-content
+            menu.classList.toggle('nav-menu');            
+            e.preventDefault();
+       });       
+   })();
+    
+   function myFunction()  {       
+       
+      //screen resolution check on resize   
+      var width = window.innerWidth;
+      
+      document.getElementById("demo").innerHTML= width;
+       
+      //if resolution greater than 800 remove class nav-menu
+      if(width > 700) {
+          var menu = document.querySelector('nav');
+          menu.classList.remove('nav-menu');
+      } 
+   }    
+
+</script>
+
+
